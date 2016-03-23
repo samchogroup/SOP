@@ -5,6 +5,8 @@
  * Created on August 17, 2011, 3:26 PM
  */
 
+// hello world!
+
 #ifndef GPUVARS_H
 #define	GPUVARS_H
 
