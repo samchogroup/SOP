@@ -3,10 +3,11 @@
 
 #include <cmath>
 #include <cstring>
-#include <cutil_inline.h>
+//#include <cutil_inline.h>
 #include <stdint.h>
 #include <iostream>
 #include <iomanip>
+#include "vector_functions.h"
 
 //The lj_nat_pdb_dist, nl_lj_nat_pdb_dist and pl_lj_nat_pdb_dist arrays need to
 //be used as sorting values by CUDPP.  CUDPP currently only supports 32-bit 

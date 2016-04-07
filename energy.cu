@@ -146,7 +146,7 @@ void force_eval()
     blocksy*gridsy, nil_rep, dev_force, dev_unc_pos, dev_idx_pair_list_rep);
 #endif
   cudaThreadSynchronize();
-  cutilCheckMsg("Force kernel failure");
+  //cutilCheckMsg("Force kernel failure");
 }//end force_eval
 
 //If CURAND is to be used, call rand_kernel to add random forces to each bead.
@@ -162,7 +162,7 @@ void random_force()
   
   rand_kernel<<<rand_grid, threads>>>(nbead, dev_force, devStates, var);
   cudaThreadSynchronize();
-  cutilCheckMsg("rand_kernel failure");
+  //cutilCheckMsg("rand_kernel failure");
   
 }//end random_force_r
 #else

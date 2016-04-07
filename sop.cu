@@ -249,18 +249,18 @@ void underdamped_ctrl()
         //logging from the device to the host.  One more transfer to update
         //the increment array will take place in the calculate_observables()
         //function if sim_type is 2.
-        cutilSafeCall(cudaMemcpy(pos, dev_pos, pos_size, 
-          cudaMemcpyDeviceToHost));
-        cutilSafeCall(cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
-          cudaMemcpyDeviceToHost));
-        cutilSafeCall(cudaMemcpy(idx_pair_list_att, dev_idx_pair_list_att, 
-          nil_att * sizeof (ushort2), cudaMemcpyDeviceToHost));
-        cutilSafeCall(cudaMemcpy(idx_pair_list_rep, dev_idx_pair_list_rep, 
-          nil_rep * sizeof (ushort2), cudaMemcpyDeviceToHost));
-        cutilSafeCall(cudaMemcpy(pl_lj_nat_pdb_dist, dev_pl_lj_nat_pdb_dist, 
-          nil_att * sizeof (PDB_FLOAT), cudaMemcpyDeviceToHost));
-        cutilSafeCall(cudaMemcpy(vel, dev_vel, vel_size, 
-          cudaMemcpyDeviceToHost));
+        cudaMemcpy(pos, dev_pos, pos_size, 
+          cudaMemcpyDeviceToHost);
+        cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
+          cudaMemcpyDeviceToHost);
+        cudaMemcpy(idx_pair_list_att, dev_idx_pair_list_att, 
+          nil_att * sizeof (ushort2), cudaMemcpyDeviceToHost);
+        cudaMemcpy(idx_pair_list_rep, dev_idx_pair_list_rep, 
+          nil_rep * sizeof (ushort2), cudaMemcpyDeviceToHost);
+        cudaMemcpy(pl_lj_nat_pdb_dist, dev_pl_lj_nat_pdb_dist, 
+          nil_att * sizeof (PDB_FLOAT), cudaMemcpyDeviceToHost);
+        cudaMemcpy(vel, dev_vel, vel_size, 
+          cudaMemcpyDeviceToHost);
         energy_eval();
         calculate_observables(incr);
         sprintf(oline, "%.0lf %f %f %f %f %f %f %f %f %f %d %f",
@@ -593,8 +593,8 @@ void calculate_observables(FLOAT3* increment)
   }//end fi sim_type == 1
   else if (sim_type == 2)
   {
-    cutilSafeCall(cudaMemcpy(increment, dev_incr, incr_size, 
-      cudaMemcpyDeviceToHost));
+    cudaMemcpy(increment, dev_incr, incr_size, 
+      cudaMemcpyDeviceToHost);
     sumvsq = 0.0;
     for (int i = 0; i < nbead; i++)
     {
@@ -970,7 +970,7 @@ void update_neighbor_list()
     boxl, blocksx*gridsx, blocksy*gridsy, ncon_rep, dev_unc_pos, 
     dev_idx_bead_lj_non_nat);
   cudaThreadSynchronize();
-  cutilCheckMsg("update_neighbor_list_rep_kernel failed");
+  //cutilCheckMsg("update_neighbor_list_rep_kernel failed");
   //</editor-fold>
 
   //<editor-fold defaultstate="collapsed" desc="CUDPP Att code">
@@ -983,50 +983,49 @@ void update_neighbor_list()
   //the order is lost.  Obtaining a copy allows the pdb array to be sorted
   //in an identical way to the idx array, insuring that the corresponding
   //values are in identical positions in the arrays.
-  cutilSafeCall(cudaMemcpy(dev_is_nl_2, dev_is_list_att,
-    is_list_att_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_is_nl_2, dev_is_list_att,
+    is_list_att_size, cudaMemcpyDeviceToDevice);
 
   //Copy the default values of idx_bead_lj_nat to idx_neighbor_list_att. The
   //idx_bead_lj_nat array must be kept in its initial order and the 
   //idx_neighbor_list array must be identical to the idx_bead_lj_nat array
   //before the sort and scan algorithm is used.
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, dev_idx_bead_lj_nat,
-    idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_att, dev_idx_bead_lj_nat,
+    idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice);
 
   //Sort the idx_neighbor_list_att array based on the information in 
   //the is_list_att array.  The entries that are in the neighbor list
   //will be in the first portion of the array and those that are not will be
   //in the last portion
-  result = cudppSort(sort_plan, dev_is_list_att,
-    dev_idx_neighbor_list_att, 1, ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_list_att,
+    dev_idx_neighbor_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Copy the default values of lj_nat_pdb_dist to nl_lj_nat_pdb_dist.  The
   //jl_nat_pdb_dist array must be kept in its initial order and the 
   //nl_lj_nat_pdb_dist array must be identical to the lj_nat_pdb_dist array
   //before the sort and scan algorithm is used.
-  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
-    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_nl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
+    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice);
 
   //Sort the lj_nat_pdb_dist array based on the information in the copy
   //of is_list_att array.  The entries corresponding to the interactions in the
   //pair list will be in the first portion of the array and those that are not
   //will be in the last portion
-  result = cudppSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, 1,
-    ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Perform the parallel scan of the is_list_att array, counting the number
   //of 1's that appear.  This number corresponds to the number of interactions
@@ -1040,17 +1039,17 @@ void update_neighbor_list()
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Temporary storage for the result of the scan
   unsigned int *num;
   num = new unsigned int[1];
   //Copy the last entry of dev_is_nl_scan_att, corresponding to the total sum
   //of 1's in is_list_att to the host variable "num"
-  cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
-    sizeof (unsigned int), cudaMemcpyDeviceToHost));
+  cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
+    sizeof (unsigned int), cudaMemcpyDeviceToHost);
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //The total number of attractive entries in the neighbor list is equal to
   //the total number of attractive interactions (ncon_att) minus the number
@@ -1074,24 +1073,24 @@ void update_neighbor_list()
     //The idx_bead_lj_non_nat array must be kept in its initial order and the 
     //idx_neighbor_list array must be identical to the idx_bead_lj_non_nat array
     //before the sort and scan algorithm is used.
-    cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
-      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
+      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Sort the idx_neighbor_list_rep array based on the information in 
     //the is_list_rep array.  The entries that are in the neighbor list
     //will be in the first portion of the array and those that are not will be
     //in the last portion
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_neighbor_list_rep, 1, ncon_rep);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_neighbor_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Perform the parallel scan of the is_list_rep array, counting the number
     //of 1's that appear.  This number corresponds to the number of interactions
@@ -1106,12 +1105,12 @@ void update_neighbor_list()
     }
     cudaThreadSynchronize();
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the last entry of dev_is_nl_scan_rep, corresponding to the total sum
     //of 1's in is_list_rep to the host variable "num"
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The total number of repulsive entries in the neighbor list is equal to
     //the total number of repulsive interactions (ncon_rep) minus the number
@@ -1130,8 +1129,8 @@ void update_neighbor_list()
   else
   {
     //Copy first NCON_REP_CUTOFF elements to idx_nl_rep.
-    cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
-      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
+      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice);
 
     //Calculate the number or entries that will be in the temporary array.  This
     //is simply the total number of repulsive interactions (ncon_rep) minus the 
@@ -1142,33 +1141,33 @@ void update_neighbor_list()
     //idx_rep_temp will hold the entries at and above the 32 millionth index
     //in the original idx list
     ushort2* idx_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp));
+    cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp);
 
     //is_nl_rep_tmp will hold the entries at and above the 32 millionth index
     //in the original is_list
     unsigned int* is_nl_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &is_nl_rep_tmp, 
-      sizeof (unsigned int) * numTmp));
+    cudaMalloc((void**) &is_nl_rep_tmp, 
+      sizeof (unsigned int) * numTmp);
 
     //Copy last ncon_rep - NCON_REP_CUTOFF elements to temporary arrays
-    cutilSafeCall(cudaMemcpy(idx_rep_tmp, 
+    cudaMemcpy(idx_rep_tmp, 
       &(dev_idx_bead_lj_non_nat[NCON_REP_CUTOFF]), sizeof (ushort2) * numTmp, 
-      cudaMemcpyDeviceToDevice));
-    cutilSafeCall(cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
-      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice));
+      cudaMemcpyDeviceToDevice);
+    cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
+      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice);
 
     //Sort first NCON_REP_CUTOFF elements of original array
     err = cudaGetLastError();
-    cutilSafeCall(err);
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_neighbor_list_rep, 1, NCON_REP_CUTOFF);
+    //cutilSafeCall(err);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_neighbor_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan first NCON_REP_CUTOFF elements to determine how many entries would be
     //in is_nl_rep
@@ -1180,15 +1179,15 @@ void update_neighbor_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the 32million - 1st entry of dev_is_nl_scan_rep to the host.  This 
     //corresponds to the number of 1's in the array, or the number of entries
     //that are NOT in the pair list
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //The number of entries in the neighbor list (to be stored in num) is equal
     //to the total number of values sorted (NCON_REP_CUTOFF) minus the number
@@ -1196,15 +1195,15 @@ void update_neighbor_list()
     *num = NCON_REP_CUTOFF - *num;
 
     //Sort elements of temp array
-    result = cudppSort(sort_plan, is_nl_rep_tmp,
-      idx_rep_tmp, 1, numTmp);
+    result = cudppRadixSort(sort_plan, is_nl_rep_tmp,
+      idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan elements of temp array to determine how many will be copied back to
     //the original array
@@ -1216,7 +1215,7 @@ void update_neighbor_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //num2 is a temporary variable to store the number of entries in the 
     //temporary array that are NOT in the neighbor list
@@ -1227,8 +1226,8 @@ void update_neighbor_list()
     //of entires in the temporary array that are NOT in the neighbor list, to
     //the host
     //std::cout << "numTmp: " << numTmp << std::endl;
-    cutilSafeCall(cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The number of entries in the neighbor list (to be stored in num2) that are
     //in the temporary array is equal to the total number of values sorted 
@@ -1238,8 +1237,8 @@ void update_neighbor_list()
 
     //Copy num_is_temp valid entries to original array starting at the num'th
     //entry
-    cutilSafeCall(cudaMemcpy(&(dev_idx_neighbor_list_rep[(*num)]), idx_rep_tmp,
-      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice));
+    cudaMemcpy(&(dev_idx_neighbor_list_rep[(*num)]), idx_rep_tmp,
+      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice);
 
     //The total number of entries in the repulsive neighbor list (nnl_rep) is
     //equal to the number of entries in the original list (num) plus the number
@@ -1249,8 +1248,8 @@ void update_neighbor_list()
     //Free temp arrays
     free(num);
     free(num2);
-    cutilSafeCall(cudaFree(idx_rep_tmp));
-    cutilSafeCall(cudaFree(is_nl_rep_tmp));
+    cudaFree(idx_rep_tmp);
+    cudaFree(is_nl_rep_tmp);
   }
   //</editor-fold>
 
@@ -1308,12 +1307,12 @@ using namespace std;
     boxl, blocksx*gridsx, blocksy*gridsy, ncon_rep, dev_unc_pos, 
     dev_idx_bead_lj_non_nat);
   cudaThreadSynchronize();
-  cutilCheckMsg("update_neighbor_list_rep_kernel failed");
+  //cutilCheckMsg("update_neighbor_list_rep_kernel failed");
   //</editor-fold>
 
   //Copy needed arrays to the host
-  cutilSafeCall(cudaMemcpy(is_list_att, dev_is_list_att, is_list_att_size, cudaMemcpyDeviceToHost));
-  cutilSafeCall(cudaMemcpy(is_list_rep, dev_is_list_rep, is_list_rep_size, cudaMemcpyDeviceToHost));
+  cudaMemcpy(is_list_att, dev_is_list_att, is_list_att_size, cudaMemcpyDeviceToHost);
+  cudaMemcpy(is_list_rep, dev_is_list_rep, is_list_rep_size, cudaMemcpyDeviceToHost);
   
   // should be native distance
   for (int i=0; i<ncon_att; i++) {
@@ -1336,12 +1335,12 @@ using namespace std;
   }
   
   //Copy updated values back to the GPU
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, 
-    /*idx_neighbor_list_att_size**/ nnl_att * sizeof(ushort2), cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, 
-    /*nl_lj_nat_pdb_dist_size**/ nnl_att * sizeof(PDB_FLOAT), cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, 
-    /*idx_neighbor_list_rep_size**/ nnl_rep * sizeof(ushort2), cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, 
+    /*idx_neighbor_list_att_size**/ nnl_att * sizeof(ushort2), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, 
+    /*nl_lj_nat_pdb_dist_size**/ nnl_att * sizeof(PDB_FLOAT), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, 
+    /*idx_neighbor_list_rep_size**/ nnl_rep * sizeof(ushort2), cudaMemcpyHostToDevice);
 
   if (nnl_rep == 0) {
     cerr << "Neighbor List is EMPTY!!" << endl;
@@ -1364,8 +1363,8 @@ void update_neighbor_list() {
   //Copy the needed data to the CPU from the GPU.  The unc_pos array will need
   //to be copied, but the other arrays that are read from in NL calculations
   //are static/global arrays
-  cutilSafeCall(cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
-    cudaMemcpyDeviceToHost));
+  cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
+    cudaMemcpyDeviceToHost);
 
   for (int i=0; i<ncon_att; i++) {
 
@@ -1436,15 +1435,15 @@ void update_neighbor_list() {
   }
   
   //Write the modified arrays back to the GPU
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, 
+  cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, 
     /*idx_neighbor_list_att_size**/ nnl_att * sizeof(ushort2), 
-    cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, 
+    cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, 
     /*nl_lj_nat_pdb_dist_size**/ nnl_att * sizeof(PDB_FLOAT), 
-    cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, 
+    cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, 
     /*idx_neighbor_list_rep_size**/ nnl_rep * sizeof(ushort2), 
-    cudaMemcpyHostToDevice));
+    cudaMemcpyHostToDevice);
 }
 #endif
 #endif
@@ -1484,7 +1483,7 @@ void update_pair_list()
     boxl, nnl_rep, dev_unc_pos, dev_idx_neighbor_list_rep);
   cudaThreadSynchronize();
   
-  cutilCheckMsg("Kernel execution failed");
+  //cutilCheckMsg("Kernel execution failed");
   //</editor-fold>
 
   //<editor-fold defaultstate="collapsed" desc="CUDPP Att code">
@@ -1498,8 +1497,8 @@ void update_pair_list()
   //the order is lost.  Obtaining a copy allows the pdb array to be sorted
   //in an identical way to the idx array, insuring that the corresponding
   //values are in identical positions in the arrays.
-  cutilSafeCall(cudaMemcpy(dev_is_nl_2, dev_is_list_att,
-    is_list_att_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_is_nl_2, dev_is_list_att,
+    is_list_att_size, cudaMemcpyDeviceToDevice);
 
   //Re-use the space allocated for the neighbor list for the pair list.  The
   //entries of the neighbor list will still be in the first nnl_att entries
@@ -1510,15 +1509,15 @@ void update_pair_list()
   //the is_list_att array.  The entries that are in the pair list
   //will be in the first portion of the array and those that are not will be
   //in the last portion
-  result = cudppSort(sort_plan, dev_is_list_att,
-    dev_idx_pair_list_att, 1, nnl_att);
+  result = cudppRadixSort(sort_plan, dev_is_list_att,
+    dev_idx_pair_list_att, nnl_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Re-use the space allocated for dev_nl_lj_nat_pdb_dist for the
   //dev_pl_lj_nat_pdb_dist array.  The entries of the neighbor list will still 
@@ -1530,15 +1529,14 @@ void update_pair_list()
   //of is_list_att array.  The entries corresponding to the interactions in the
   //pair list will be in the first portion of the array and those that are not
   //will be in the last portion
-  result = cudppSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, 1,
-    nnl_att);
+  result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, nnl_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Perform the parallel scan of the is_list_att array, counting the number
   //of 1's that appear.  This number corresponds to the number of interactions
@@ -1552,17 +1550,17 @@ void update_pair_list()
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Temporary storage for the result of the scan
   unsigned int *num;
   num = new unsigned int[1];
   //Copy the last entry of dev_is_nl_scan_att, corresponding to the total sum
   //of 1's in is_list_att to the host variable "num"
-  cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_att[nnl_att - 1]),
-    sizeof (unsigned int), cudaMemcpyDeviceToHost));
+  cudaMemcpy(num, &(dev_is_nl_scan_att[nnl_att - 1]),
+    sizeof (unsigned int), cudaMemcpyDeviceToHost);
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //The total number of attractive entries in the neighbor list is equal to
   //the total number of attractive interactions (ncon_att) minus the number
@@ -1581,15 +1579,15 @@ void update_pair_list()
   //the is_list_rep array.  The entries that are in the pair list
   //will be in the first portion of the array and those that are not will be
   //in the last portion
-  result = cudppSort(sort_plan, dev_is_list_rep,
-    dev_idx_pair_list_rep, 1, nnl_rep);
+  result = cudppRadixSort(sort_plan, dev_is_list_rep,
+    dev_idx_pair_list_rep, nnl_rep);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_rep) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Perform the parallel scan of the is_list_rep array, counting the number
   //of 1's that appear.  This number corresponds to the number of interactions
@@ -1598,7 +1596,7 @@ void update_pair_list()
   result = cudppScan(scan_plan, dev_is_nl_scan_rep, dev_is_list_rep,
     nnl_rep);
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error scanning rep\n");
@@ -1607,8 +1605,8 @@ void update_pair_list()
 
   //Copy the last entry of dev_is_nl_scan_rep, corresponding to the total sum
   //of 1's in is_list_rep to the host variable "num"
-  cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[nnl_rep - 1]), 
-    sizeof (unsigned int), cudaMemcpyDeviceToHost));
+  cudaMemcpy(num, &(dev_is_nl_scan_rep[nnl_rep - 1]), 
+    sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
   //The total number of repulsive entries in the pair list is equal to
   //the total number of repulsive interactions in the neighbor list(nnl_rep) 
@@ -1648,18 +1646,18 @@ void update_pair_list() {
   update_pair_list_rep_kernel <<<grid_rep, threads_rep>>>(dev_is_list_rep,
     boxl, nnl_rep, dev_unc_pos, dev_idx_neighbor_list_rep);
   cudaThreadSynchronize();
-  cutilCheckMsg("Kernel execution failed");
+  //cutilCheckMsg("Kernel execution failed");
   //</editor-fold>
   
   //Copy needed values to the CPU
-  cutilSafeCall(cudaMemcpy(is_list_att, dev_is_list_att, nnl_att * sizeof(unsigned int) /*is_list_att_size**/, cudaMemcpyDeviceToHost));
+  cudaMemcpy(is_list_att, dev_is_list_att, nnl_att * sizeof(unsigned int) /*is_list_att_size**/, cudaMemcpyDeviceToHost);
   //Might still be up to date from neighbor list update
 //  cutilSafeCall(cudaMemcpy(idx_neighbor_list_att, dev_idx_neighbor_list_att, idx_neighbor_list_att_size, cudaMemcpyDeviceToHost));
 //  cutilSafeCall(cudaMemcpy(idx_pair_list_att, dev_idx_pair_list_att, idx_pair_list_att_size, cudaMemcpyDeviceToHost));
   //Might still be up to date from neighbor list update
 //  cutilSafeCall(cudaMemcpy(nl_lj_nat_pdb_dist, dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist_size, cudaMemcpyDeviceToHost));
 //  cutilSafeCall(cudaMemcpy(pl_lj_nat_pdb_dist, dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist_size, cudaMemcpyDeviceToHost));
-  cutilSafeCall(cudaMemcpy(is_list_rep, dev_is_list_rep, nnl_rep * sizeof(unsigned int) /*is_list_rep_size**/, cudaMemcpyDeviceToHost));
+  cudaMemcpy(is_list_rep, dev_is_list_rep, nnl_rep * sizeof(unsigned int) /*is_list_rep_size**/, cudaMemcpyDeviceToHost);
   //Might still be up to date from neighbor list update
 //  cutilSafeCall(cudaMemcpy(idx_neighbor_list_rep, dev_idx_neighbor_list_rep, idx_neighbor_list_rep_size, cudaMemcpyDeviceToHost));
 
@@ -1693,12 +1691,12 @@ void update_pair_list() {
   }
   
   //Copy updated values back to the GPU
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice);
 //  cutilSafeCall(cudaMemcpy(dev_idx_pair_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice));
 //  cutilSafeCall(cudaMemcpy(dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, nil_att * sizeof(PDB_FLOAT) /*pl_lj_nat_pdb_dist_size**/, cudaMemcpyHostToDevice));
   cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, nil_att * sizeof(PDB_FLOAT) /*pl_lj_nat_pdb_dist_size**/, cudaMemcpyHostToDevice));
 //  cutilSafeCall(cudaMemcpy(dev_idx_pair_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice);
   
   dev_idx_pair_list_att = dev_idx_neighbor_list_att;
   dev_pl_lj_nat_pdb_dist = dev_nl_lj_nat_pdb_dist;
@@ -1721,17 +1719,17 @@ void update_pair_list() {
   nil_rep = 0;
 
   //Copy needed arrays to the CPU from the GPU
-  cutilSafeCall(cudaMemcpy(idx_neighbor_list_att, dev_idx_neighbor_list_att, 
+  cudaMemcpy(idx_neighbor_list_att, dev_idx_neighbor_list_att, 
     /*idx_neighbor_list_att_size**/ nnl_att * sizeof(ushort2), 
-    cudaMemcpyDeviceToHost));
-  cutilSafeCall(cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
-    cudaMemcpyDeviceToHost));
-  cutilSafeCall(cudaMemcpy(nl_lj_nat_pdb_dist, dev_nl_lj_nat_pdb_dist, 
+    cudaMemcpyDeviceToHost);
+  cudaMemcpy(unc_pos, dev_unc_pos, unc_pos_size, 
+    cudaMemcpyDeviceToHost);
+  cudaMemcpy(nl_lj_nat_pdb_dist, dev_nl_lj_nat_pdb_dist, 
     /*nl_lj_nat_pdb_dist_size**/ nnl_att * sizeof(PDB_FLOAT), 
-    cudaMemcpyDeviceToHost));
-  cutilSafeCall(cudaMemcpy(idx_neighbor_list_rep, dev_idx_neighbor_list_rep, 
+    cudaMemcpyDeviceToHost);
+  cudaMemcpy(idx_neighbor_list_rep, dev_idx_neighbor_list_rep, 
     /*idx_neighbor_list_rep_size**/ nnl_rep * sizeof(ushort2), 
-    cudaMemcpyDeviceToHost));
+    cudaMemcpyDeviceToHost);
 
   // should be native distance
   for (int i=0; i<nnl_att; i++) {
@@ -1810,12 +1808,12 @@ void update_pair_list() {
   }
   
   //Copy updated values back to the GPU
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice);
 //  cutilSafeCall(cudaMemcpy(dev_idx_pair_list_att, idx_pair_list_att, nil_att * sizeof(ushort2) /*idx_pair_list_att_size**/, cudaMemcpyHostToDevice));
 //  cutilSafeCall(cudaMemcpy(dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, nil_att * sizeof(PDB_FLOAT) /*pl_lj_nat_pdb_dist_size**/, cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, nil_att * sizeof(PDB_FLOAT) /*pl_lj_nat_pdb_dist_size**/, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_nl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, nil_att * sizeof(PDB_FLOAT) /*pl_lj_nat_pdb_dist_size**/, cudaMemcpyHostToDevice);
 //  cutilSafeCall(cudaMemcpy(dev_idx_pair_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_rep, idx_pair_list_rep, nil_rep * sizeof(ushort2) /*idx_pair_list_rep_size**/, cudaMemcpyHostToDevice);
   
   dev_idx_pair_list_att = dev_idx_neighbor_list_att;
   dev_pl_lj_nat_pdb_dist = dev_nl_lj_nat_pdb_dist;
@@ -1892,52 +1890,51 @@ void update_hybrid_list()
     blocksx*gridsx, blocksy*gridsy, ncon_rep, dev_idx_bead_lj_non_nat, dev_cell_list, ncell - 1);
   
   cudaThreadSynchronize();
-  cutilCheckMsg("update_hybrid_list_rep_kernel failed");
+  //cutilCheckMsg("update_hybrid_list_rep_kernel failed");
   
-  cutilSafeCall(cudaMemcpy(dev_is_nl_2, dev_is_list_att,
-    is_list_att_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_is_nl_2, dev_is_list_att,
+    is_list_att_size, cudaMemcpyDeviceToDevice);
 
   //Copy the default values of idx_bead_lj_nat to idx_neighbor_list_att. The
   //idx_bead_lj_nat array must be kept in its initial order and the 
   //idx_neighbor_list array must be identical to the idx_bead_lj_nat array
   //before the sort and scan algorithm is used.
-  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, dev_idx_bead_lj_nat,
-    idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_idx_neighbor_list_att, dev_idx_bead_lj_nat,
+    idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice);
 
   //Sort the idx_neighbor_list_att array based on the information in 
   //the is_list_att array.  The entries that are in the neighbor list
   //will be in the first portion of the array and those that are not will be
   //in the last portion
-  result = cudppSort(sort_plan, dev_is_list_att,
-    dev_idx_neighbor_list_att, 1, ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_list_att,
+    dev_idx_neighbor_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Copy the default values of lj_nat_pdb_dist to nl_lj_nat_pdb_dist.  The
   //jl_nat_pdb_dist array must be kept in its initial order and the 
   //nl_lj_nat_pdb_dist array must be identical to the lj_nat_pdb_dist array
   //before the sort and scan algorithm is used.
-  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
-    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_nl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
+    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice);
 
   //Sort the lj_nat_pdb_dist array based on the information in the copy
   //of is_list_att array.  The entries corresponding to the interactions in the
   //pair list will be in the first portion of the array and those that are not
   //will be in the last portion
-  result = cudppSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, 1,
-    ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Perform the parallel scan of the is_list_att array, counting the number
   //of 1's that appear.  This number corresponds to the number of interactions
@@ -1951,17 +1948,17 @@ void update_hybrid_list()
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Temporary storage for the result of the scan
   unsigned int *num;
   num = new unsigned int[1];
   //Copy the last entry of dev_is_nl_scan_att, corresponding to the total sum
   //of 1's in is_list_att to the host variable "num"
-  cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
-    sizeof (unsigned int), cudaMemcpyDeviceToHost));
+  cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
+    sizeof (unsigned int), cudaMemcpyDeviceToHost);
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //The total number of attractive entries in the neighbor list is equal to
   //the total number of attractive interactions (ncon_att) minus the number
@@ -1985,24 +1982,24 @@ void update_hybrid_list()
     //The idx_bead_lj_non_nat array must be kept in its initial order and the 
     //idx_neighbor_list array must be identical to the idx_bead_lj_non_nat array
     //before the sort and scan algorithm is used.
-    cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
-      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
+      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Sort the idx_neighbor_list_rep array based on the information in 
     //the is_list_rep array.  The entries that are in the neighbor list
     //will be in the first portion of the array and those that are not will be
     //in the last portion
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_neighbor_list_rep, 1, ncon_rep);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_neighbor_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Perform the parallel scan of the is_list_rep array, counting the number
     //of 1's that appear.  This number corresponds to the number of interactions
@@ -2017,12 +2014,12 @@ void update_hybrid_list()
     }
     cudaThreadSynchronize();
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the last entry of dev_is_nl_scan_rep, corresponding to the total sum
     //of 1's in is_list_rep to the host variable "num"
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The total number of repulsive entries in the neighbor list is equal to
     //the total number of repulsive interactions (ncon_rep) minus the number
@@ -2041,8 +2038,8 @@ void update_hybrid_list()
   else
   {
     //Copy first NCON_REP_CUTOFF elements to idx_nl_rep.
-    cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
-      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_neighbor_list_rep, dev_idx_bead_lj_non_nat,
+      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice);
 
     //Calculate the number or entries that will be in the temporary array.  This
     //is simply the total number of repulsive interactions (ncon_rep) minus the 
@@ -2053,33 +2050,33 @@ void update_hybrid_list()
     //idx_rep_temp will hold the entries at and above the 32 millionth index
     //in the original idx list
     ushort2* idx_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp));
+    cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp);
 
     //is_nl_rep_tmp will hold the entries at and above the 32 millionth index
     //in the original is_list
     unsigned int* is_nl_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &is_nl_rep_tmp, 
-      sizeof (unsigned int) * numTmp));
+    cudaMalloc((void**) &is_nl_rep_tmp, 
+      sizeof (unsigned int) * numTmp);
 
     //Copy last ncon_rep - NCON_REP_CUTOFF elements to temporary arrays
-    cutilSafeCall(cudaMemcpy(idx_rep_tmp, 
+    cudaMemcpy(idx_rep_tmp, 
       &(dev_idx_bead_lj_non_nat[NCON_REP_CUTOFF]), sizeof (ushort2) * numTmp, 
-      cudaMemcpyDeviceToDevice));
-    cutilSafeCall(cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
-      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice));
+      cudaMemcpyDeviceToDevice);
+    cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
+      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice);
 
     //Sort first NCON_REP_CUTOFF elements of original array
     err = cudaGetLastError();
-    cutilSafeCall(err);
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_neighbor_list_rep, 1, NCON_REP_CUTOFF);
+    //cutilSafeCall(err);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_neighbor_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan first NCON_REP_CUTOFF elements to determine how many entries would be
     //in is_nl_rep
@@ -2091,15 +2088,15 @@ void update_hybrid_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the 32million - 1st entry of dev_is_nl_scan_rep to the host.  This 
     //corresponds to the number of 1's in the array, or the number of entries
     //that are NOT in the pair list
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //The number of entries in the neighbor list (to be stored in num) is equal
     //to the total number of values sorted (NCON_REP_CUTOFF) minus the number
@@ -2107,15 +2104,15 @@ void update_hybrid_list()
     *num = NCON_REP_CUTOFF - *num;
 
     //Sort elements of temp array
-    result = cudppSort(sort_plan, is_nl_rep_tmp,
-      idx_rep_tmp, 1, numTmp);
+    result = cudppRadixSort(sort_plan, is_nl_rep_tmp,
+      idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan elements of temp array to determine how many will be copied back to
     //the original array
@@ -2127,7 +2124,7 @@ void update_hybrid_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //num2 is a temporary variable to store the number of entries in the 
     //temporary array that are NOT in the neighbor list
@@ -2138,8 +2135,8 @@ void update_hybrid_list()
     //of entires in the temporary array that are NOT in the neighbor list, to
     //the host
     //std::cout << "numTmp: " << numTmp << std::endl;
-    cutilSafeCall(cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The number of entries in the neighbor list (to be stored in num2) that are
     //in the temporary array is equal to the total number of values sorted 
@@ -2149,8 +2146,8 @@ void update_hybrid_list()
 
     //Copy num_is_temp valid entries to original array starting at the num'th
     //entry
-    cutilSafeCall(cudaMemcpy(&(dev_idx_neighbor_list_rep[(*num)]), idx_rep_tmp,
-      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice));
+    cudaMemcpy(&(dev_idx_neighbor_list_rep[(*num)]), idx_rep_tmp,
+      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice);
 
     //The total number of entries in the repulsive neighbor list (nnl_rep) is
     //equal to the number of entries in the original list (num) plus the number
@@ -2161,8 +2158,8 @@ void update_hybrid_list()
     free(num);
     free(num2);
     //cudaFree(dev_cell_list);
-    cutilSafeCall(cudaFree(idx_rep_tmp));
-    cutilSafeCall(cudaFree(is_nl_rep_tmp));
+    cudaFree(idx_rep_tmp);
+    cudaFree(is_nl_rep_tmp);
   }
   //</editor-fold>
 
@@ -2323,10 +2320,10 @@ void update_cell_list()
          blocksx*gridsx, blocksy*gridsy, ncon_rep, dev_idx_bead_lj_non_nat, dev_cell_list, ncell - 1);
   
    cudaThreadSynchronize();
-   cutilCheckMsg("update_cell_list_rep_kernel failed");
+   //cutilCheckMsg("update_cell_list_rep_kernel failed");
    
-   cutilSafeCall(cudaMemcpy(dev_is_nl_2, dev_is_list_att,
-    is_list_att_size, cudaMemcpyDeviceToDevice));
+   cudaMemcpy(dev_is_nl_2, dev_is_list_att,
+    is_list_att_size, cudaMemcpyDeviceToDevice);
 
   //Copy the default values of idx_bead_lj_nat to idx_pair_list_att. The
   //idx_bead_lj_nat array must be kept in its initial order and the 
@@ -2334,43 +2331,42 @@ void update_cell_list()
   //before the sort and scan algorithm is used.
    dev_idx_pair_list_att = dev_idx_neighbor_list_att;
 
-   cutilSafeCall(cudaMemcpy(dev_idx_pair_list_att, dev_idx_bead_lj_nat,
-            idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice));
+   cudaMemcpy(dev_idx_pair_list_att, dev_idx_bead_lj_nat,
+            idx_bead_lj_nat_size, cudaMemcpyDeviceToDevice);
 
   //Sort the idx_neighbor_list_att array based on the information in 
   //the is_list_att array.  The entries that are in the neighbor list
   //will be in the first portion of the array and those that are not will be
   //in the last portion
-  result = cudppSort(sort_plan, dev_is_list_att,
-    dev_idx_pair_list_att, 1, ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_list_att,
+    dev_idx_pair_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Copy the default values of lj_nat_pdb_dist to nl_lj_nat_pdb_dist.  The
   //jl_nat_pdb_dist array must be kept in its initial order and the 
   //nl_lj_nat_pdb_dist array must be identical to the lj_nat_pdb_dist array
   //before the sort and scan algorithm is used.
-  cutilSafeCall(cudaMemcpy(dev_pl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
-    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice));
+  cudaMemcpy(dev_pl_lj_nat_pdb_dist, dev_lj_nat_pdb_dist,
+    lj_nat_pdb_dist_size, cudaMemcpyDeviceToDevice);
 
   //Sort the lj_nat_pdb_dist array based on the information in the copy
   //of is_list_att array.  The entries corresponding to the interactions in the
   //pair list will be in the first portion of the array and those that are not
   //will be in the last portion
-  result = cudppSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, 1,
-    ncon_att);
+  result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
     printf("Error calling cppSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Perform the parallel scan of the is_list_att array, counting the number
   //of 1's that appear.  This number corresponds to the number of interactions
@@ -2384,17 +2380,17 @@ void update_cell_list()
     exit(-1);
   }
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //Temporary storage for the result of the scan
   unsigned int *num;
   num = new unsigned int[1];
   //Copy the last entry of dev_is_nl_scan_att, corresponding to the total sum
   //of 1's in is_list_att to the host variable "num"
-  cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
-    sizeof (unsigned int), cudaMemcpyDeviceToHost));
+  cudaMemcpy(num, &(dev_is_nl_scan_att[ncon_att - 1]),
+    sizeof (unsigned int), cudaMemcpyDeviceToHost);
   err = cudaGetLastError();
-  cutilSafeCall(err);
+  //cutilSafeCall(err);
 
   //The total number of attractive entries in the pair list is equal to
   //the total number of attractive interactions (ncon_att) minus the number
@@ -2419,24 +2415,24 @@ void update_cell_list()
     //idx_neighbor_list array must be identical to the idx_bead_lj_non_nat array
     //before the sort and scan algorithm is used.
     dev_idx_pair_list_rep = dev_idx_neighbor_list_rep;
-    cutilSafeCall(cudaMemcpy(dev_idx_pair_list_rep, dev_idx_bead_lj_non_nat,
-      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_pair_list_rep, dev_idx_bead_lj_non_nat,
+      idx_bead_lj_non_nat_size, cudaMemcpyDeviceToDevice);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Sort the idx_neighbor_list_rep array based on the information in 
     //the is_list_rep array.  The entries that are in the neighbor list
     //will be in the first portion of the array and those that are not will be
     //in the last portion
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_pair_list_rep, 1, ncon_rep);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_pair_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Perform the parallel scan of the is_list_rep array, counting the number
     //of 1's that appear.  This number corresponds to the number of interactions
@@ -2451,12 +2447,12 @@ void update_cell_list()
     }
     cudaThreadSynchronize();
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the last entry of dev_is_nl_scan_rep, corresponding to the total sum
     //of 1's in is_list_rep to the host variable "num"
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[ncon_rep - 1]), 
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The total number of repulsive entries in the neighbor list is equal to
     //the total number of repulsive interactions (ncon_rep) minus the number
@@ -2476,8 +2472,8 @@ void update_cell_list()
   {
      dev_idx_pair_list_rep = dev_idx_neighbor_list_rep;
     //Copy first NCON_REP_CUTOFF elements to idx_nl_rep.
-    cutilSafeCall(cudaMemcpy(dev_idx_pair_list_rep, dev_idx_bead_lj_non_nat,
-      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice));
+    cudaMemcpy(dev_idx_pair_list_rep, dev_idx_bead_lj_non_nat,
+      sizeof (ushort2) * NCON_REP_CUTOFF, cudaMemcpyDeviceToDevice);
 
     //Calculate the number or entries that will be in the temporary array.  This
     //is simply the total number of repulsive interactions (ncon_rep) minus the 
@@ -2488,33 +2484,33 @@ void update_cell_list()
     //idx_rep_temp will hold the entries at and above the 32 millionth index
     //in the original idx list
     ushort2* idx_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp));
+    cudaMalloc((void**) &idx_rep_tmp, sizeof (ushort2) * numTmp);
 
     //is_nl_rep_tmp will hold the entries at and above the 32 millionth index
     //in the original is_list
     unsigned int* is_nl_rep_tmp;
-    cutilSafeCall(cudaMalloc((void**) &is_nl_rep_tmp, 
-      sizeof (unsigned int) * numTmp));
+    cudaMalloc((void**) &is_nl_rep_tmp, 
+      sizeof (unsigned int) * numTmp);
 
     //Copy last ncon_rep - NCON_REP_CUTOFF elements to temporary arrays
-    cutilSafeCall(cudaMemcpy(idx_rep_tmp, 
+    cudaMemcpy(idx_rep_tmp, 
       &(dev_idx_bead_lj_non_nat[NCON_REP_CUTOFF]), sizeof (ushort2) * numTmp, 
-      cudaMemcpyDeviceToDevice));
-    cutilSafeCall(cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
-      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice));
+      cudaMemcpyDeviceToDevice);
+    cudaMemcpy(is_nl_rep_tmp, &(dev_is_list_rep[NCON_REP_CUTOFF]),
+      sizeof (unsigned int) * numTmp, cudaMemcpyDeviceToDevice);
 
     //Sort first NCON_REP_CUTOFF elements of original array
     err = cudaGetLastError();
-    cutilSafeCall(err);
-    result = cudppSort(sort_plan, dev_is_list_rep,
-      dev_idx_pair_list_rep, 1, NCON_REP_CUTOFF);
+    //cutilSafeCall(err);
+    result = cudppRadixSort(sort_plan, dev_is_list_rep,
+      dev_idx_pair_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan first NCON_REP_CUTOFF elements to determine how many entries would be
     //in is_nl_rep
@@ -2526,15 +2522,15 @@ void update_cell_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Copy the 32million - 1st entry of dev_is_nl_scan_rep to the host.  This 
     //corresponds to the number of 1's in the array, or the number of entries
     //that are NOT in the pair list
-    cutilSafeCall(cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num, &(dev_is_nl_scan_rep[NCON_REP_CUTOFF - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //The number of entries in the neighbor list (to be stored in num) is equal
     //to the total number of values sorted (NCON_REP_CUTOFF) minus the number
@@ -2542,15 +2538,15 @@ void update_cell_list()
     *num = NCON_REP_CUTOFF - *num;
 
     //Sort elements of temp array
-    result = cudppSort(sort_plan, is_nl_rep_tmp,
-      idx_rep_tmp, 1, numTmp);
+    result = cudppRadixSort(sort_plan, is_nl_rep_tmp,
+      idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
       printf("Error calling cppSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //Scan elements of temp array to determine how many will be copied back to
     //the original array
@@ -2562,7 +2558,7 @@ void update_cell_list()
       exit(-1);
     }
     err = cudaGetLastError();
-    cutilSafeCall(err);
+    //cutilSafeCall(err);
 
     //num2 is a temporary variable to store the number of entries in the 
     //temporary array that are NOT in the neighbor list
@@ -2573,8 +2569,8 @@ void update_cell_list()
     //of entires in the temporary array that are NOT in the neighbor list, to
     //the host
     //std::cout << "numTmp: " << numTmp << std::endl;
-    cutilSafeCall(cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
-      sizeof (unsigned int), cudaMemcpyDeviceToHost));
+    cudaMemcpy(num2, &(dev_is_nl_scan_rep[numTmp - 1]),
+      sizeof (unsigned int), cudaMemcpyDeviceToHost);
 
     //The number of entries in the neighbor list (to be stored in num2) that are
     //in the temporary array is equal to the total number of values sorted 
@@ -2584,8 +2580,8 @@ void update_cell_list()
 
     //Copy num_is_temp valid entries to original array starting at the num'th
     //entry
-    cutilSafeCall(cudaMemcpy(&(dev_idx_pair_list_rep[(*num)]), idx_rep_tmp,
-      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice));
+    cudaMemcpy(&(dev_idx_pair_list_rep[(*num)]), idx_rep_tmp,
+      sizeof (ushort2) * (*num2), cudaMemcpyDeviceToDevice);
 
     //The total number of entries in the repulsive neighbor list (nnl_rep) is
     //equal to the number of entries in the original list (num) plus the number
@@ -2595,8 +2591,8 @@ void update_cell_list()
     //Free temp arrays
     free(num);
     free(num2);
-    cutilSafeCall(cudaFree(idx_rep_tmp));
-    cutilSafeCall(cudaFree(is_nl_rep_tmp));
+    cudaFree(idx_rep_tmp);
+    cudaFree(is_nl_rep_tmp);
   }
   //</editor-fold>
 

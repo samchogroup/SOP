@@ -8,7 +8,7 @@
 #ifndef GPUVARS_H
 #define	GPUVARS_H
 
-#include <cutil_inline.h>
+//#include <cutil_inline.h>
 #include <iostream>
 #include <iomanip>
 #include <curand.h>
