@@ -66,8 +66,8 @@ unsigned int pl_lj_nat_pdb_dist_size;
 unsigned int idx_pair_list_rep_size;
 
 //Fene variables
-ushort *dev_ibead_bnd;
-ushort *dev_jbead_bnd;
+ushort1 *dev_ibead_bnd;
+ushort1 *dev_jbead_bnd;
 PDB_FLOAT *dev_pdb_dist;
 
 unsigned int ibead_bnd_size;
@@ -75,8 +75,8 @@ unsigned int jbead_bnd_size;
 unsigned int pdb_dist_size;
 
 //SSA variables
-ushort *dev_ibead_ang;
-ushort *dev_kbead_ang;
+ushort1 *dev_ibead_ang;
+ushort1 *dev_kbead_ang;
 
 unsigned int ibead_ang_size;
 unsigned int kbead_ang_size;

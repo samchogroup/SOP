@@ -115,8 +115,8 @@ extern unsigned int pl_lj_nat_pdb_dist_size;
 extern unsigned int idx_pair_list_rep_size;
 
 //Fene variables
-extern ushort *dev_ibead_bnd;
-extern ushort *dev_jbead_bnd;
+extern ushort1 *dev_ibead_bnd;
+extern ushort1 *dev_jbead_bnd;
 extern PDB_FLOAT *dev_pdb_dist;
 
 extern unsigned int ibead_bnd_size;
@@ -124,8 +124,8 @@ extern unsigned int jbead_bnd_size;
 extern unsigned int pdb_dist_size;
 
 //SSA variables
-extern ushort *dev_ibead_ang;
-extern ushort *dev_kbead_ang;
+extern ushort1 *dev_ibead_ang;
+extern ushort1 *dev_kbead_ang;
 
 extern unsigned int ibead_ang_size;
 extern unsigned int kbead_ang_size;

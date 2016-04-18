@@ -226,7 +226,7 @@ void fene_energy()
 
 //Calculate the fene forces using the GPU
 __global__ void fene_forces_kernel(FLOAT3 *dev_unc_pos, PDB_FLOAT *dev_pdb_dist,
-  float3 *dev_force, ushort *dev_ibead_bnd, ushort *dev_jbead_bnd, 
+  float3 *dev_force, ushort1 *dev_ibead_bnd, ushort1 *dev_jbead_bnd, 
   int nbnd, FLOAT boxl, FLOAT k_bnd, FLOAT R0sq)
 {
   int ibead, jbead;
