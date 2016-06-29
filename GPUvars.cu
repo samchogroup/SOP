@@ -135,84 +135,88 @@ void alloc_GPU_arrays()
   ibead_ang_size = nang * sizeof(ushort);
   kbead_ang_size = nang * sizeof(ushort);
   
-  cudaMalloc((void**) &dev_is_list_att, is_list_att_size);
-  cudaMalloc((void**)&dev_is_nl_2, is_list_att_size);
-  cudaMalloc((void**) &dev_is_list_rep, is_list_rep_size);
+  cutilSafeCall(cudaMalloc((void**) &dev_is_list_att, is_list_att_size));
+  cutilSafeCall(cudaMalloc((void**)&dev_is_nl_2, is_list_att_size));
+  cutilSafeCall(cudaMalloc((void**) &dev_is_list_rep, is_list_rep_size));
   
 #ifdef USE_GPU_NL_PL_NAIVE
   is_list_att = (unsigned int*) malloc(is_list_att_size);
   is_list_rep = (unsigned int*) malloc(is_list_rep_size);
 #endif
   
-  cudaMalloc((void**) &dev_is_nl_scan_att, is_nl_scan_att_size);
-  cudaMalloc((void**) &dev_is_nl_2, is_nl_2_size);
-  cudaMalloc((void**) &dev_is_nl_scan_rep, is_nl_scan_rep_size);
+  cutilSafeCall(cudaMalloc((void**) &dev_is_nl_scan_att, is_nl_scan_att_size));
+  cutilSafeCall(cudaMalloc((void**) &dev_is_nl_2, is_nl_2_size));
+  cutilSafeCall(cudaMalloc((void**) &dev_is_nl_scan_rep, is_nl_scan_rep_size));
   
-  cudaMalloc((void**) &dev_pos, pos_size);
-  cudaMemcpy(dev_pos, pos, pos_size, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_pos, pos_size));
+  cutilSafeCall(cudaMemcpy(dev_pos, pos, pos_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_unc_pos, unc_pos_size);
-  cudaMemcpy(dev_unc_pos, unc_pos, unc_pos_size, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_unc_pos, unc_pos_size));
+  cutilSafeCall(cudaMemcpy(dev_unc_pos, unc_pos, unc_pos_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_vel, vel_size);
-  cudaMemcpy(dev_vel, vel, vel_size, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_vel, vel_size));
+  cutilSafeCall(cudaMemcpy(dev_vel, vel, vel_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_force, force_size);
-  cudaMemcpy(dev_force, force, force_size, cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_force, force_size));
+  cutilSafeCall(cudaMemcpy(dev_force, force, force_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_incr, incr_size);
+  cutilSafeCall(cudaMalloc((void**) &dev_incr, incr_size));
   
-  cudaMalloc((void**) &dev_idx_bead_lj_nat, idx_bead_lj_nat_size);
-  cudaMemcpy(dev_idx_bead_lj_nat, idx_bead_lj_nat, idx_bead_lj_nat_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_idx_bead_lj_nat, idx_bead_lj_nat_size));
+  cutilSafeCall(cudaMemcpy(dev_idx_bead_lj_nat, idx_bead_lj_nat, idx_bead_lj_nat_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_lj_nat_pdb_dist, lj_nat_pdb_dist_size);
-  cudaMemcpy(dev_lj_nat_pdb_dist, lj_nat_pdb_dist, lj_nat_pdb_dist_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_lj_nat_pdb_dist, lj_nat_pdb_dist_size));
+  cutilSafeCall(cudaMemcpy(dev_lj_nat_pdb_dist, lj_nat_pdb_dist, lj_nat_pdb_dist_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_idx_bead_lj_non_nat, idx_bead_lj_non_nat_size);
-  cudaMemcpy(dev_idx_bead_lj_non_nat, idx_bead_lj_non_nat, idx_bead_lj_non_nat_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_idx_bead_lj_non_nat, idx_bead_lj_non_nat_size));
+  cutilSafeCall(cudaMemcpy(dev_idx_bead_lj_non_nat, idx_bead_lj_non_nat, idx_bead_lj_non_nat_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_idx_neighbor_list_att, idx_neighbor_list_att_size);
-  cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, idx_neighbor_list_att_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_idx_neighbor_list_att, idx_neighbor_list_att_size));
+  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_att, idx_neighbor_list_att, idx_neighbor_list_att_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist_size);
-  cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist_size));
+  cutilSafeCall(cudaMemcpy(dev_nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist, nl_lj_nat_pdb_dist_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_idx_neighbor_list_rep, idx_neighbor_list_rep_size);
-  cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, idx_neighbor_list_rep_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_idx_neighbor_list_rep, idx_neighbor_list_rep_size));
+  cutilSafeCall(cudaMemcpy(dev_idx_neighbor_list_rep, idx_neighbor_list_rep, idx_neighbor_list_rep_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_cell_list, cell_list_size);
-  //cudaMemcpy(dev_cell_list, cell_list, cell_list_size,
-    //cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_cell_list, cell_list_size));
+  //cutilSafeCall(cudaMemcpy(dev_cell_list, cell_list, cell_list_size,
+    //cudaMemcpyHostToDevice));
       
-  cudaMalloc((void**) &dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist_size);
-  cudaMemcpy(dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist_size));
+  cutilSafeCall(cudaMemcpy(dev_pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist, pl_lj_nat_pdb_dist_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_ibead_bnd, ibead_bnd_size);
-  cudaMemcpy(dev_ibead_bnd, ibead_bnd, ibead_bnd_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_ibead_bnd, ibead_bnd_size));
+  cutilSafeCall(cudaMemcpy(dev_ibead_bnd, ibead_bnd, ibead_bnd_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_jbead_bnd, jbead_bnd_size);
-  cudaMemcpy(dev_jbead_bnd, jbead_bnd, jbead_bnd_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_jbead_bnd, jbead_bnd_size));
+  cutilSafeCall(cudaMemcpy(dev_jbead_bnd, jbead_bnd, jbead_bnd_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_pdb_dist, pdb_dist_size);
-  cudaMemcpy(dev_pdb_dist, pdb_dist, pdb_dist_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_pdb_dist, pdb_dist_size));
+  cutilSafeCall(cudaMemcpy(dev_pdb_dist, pdb_dist, pdb_dist_size,
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_ibead_ang, ibead_ang_size);
-  cudaMemcpy(dev_ibead_ang, ibead_ang, ibead_ang_size, 
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_ibead_ang, ibead_ang_size));
+  cutilSafeCall(cudaMemcpy(dev_ibead_ang, ibead_ang, ibead_ang_size, 
+    cudaMemcpyHostToDevice));
   
-  cudaMalloc((void**) &dev_kbead_ang, kbead_ang_size);
-  cudaMemcpy(dev_kbead_ang, kbead_ang, kbead_ang_size,
-    cudaMemcpyHostToDevice);
+  cutilSafeCall(cudaMalloc((void**) &dev_kbead_ang, kbead_ang_size));
+  cutilSafeCall(cudaMemcpy(dev_kbead_ang, kbead_ang, kbead_ang_size,
+    cudaMemcpyHostToDevice));
   
   //Allocate streams
   for (int i = 0; i < NUM_STREAMS; ++i)
@@ -229,10 +233,6 @@ void alloc_cudpp()
 {
   std::cout << "Allocating CUDPP variables..." << std::endl;
   my_start = clock();
-
-  //Initialize the CUDPP Library
-  CUDPPHandle theCudpp;
-  cudppCreate(&theCudpp);
   
   //The configuration for the radix sort
   sort_config.datatype = CUDPP_UINT;
@@ -255,14 +255,16 @@ void alloc_cudpp()
   //be larger than the number of attractive interactions.  This has held for all
   //models used up until this point, but may change in the future.
   if(ncon_rep <= NCON_REP_CUTOFF)
-    result = cudppPlan(theCudpp, &sort_plan, sort_config, ncon_rep, 1, 0);
+    result = cudppPlan(&sort_plan, sort_config, ncon_rep, 1, 0);
   else
-    result = cudppPlan(theCudpp, &sort_plan, sort_config, NCON_REP_CUTOFF, 1, 0);
+    result = cudppPlan(&sort_plan, sort_config, NCON_REP_CUTOFF, 1, 0);
   if (CUDPP_SUCCESS != result)
   {
       std::cout << "Error creating sort_plan_rep\n" << std::endl;
       exit(-1);
   }
+  err = cudaGetLastError();
+  cutilSafeCall(err);
   
   //Set up the plan for scanning the values.  This will be used for both
   //attractive and repulsive values.
@@ -274,17 +276,17 @@ void alloc_cudpp()
   //be larger than the number of attractive interactions.  This has held for all
   //models used up until this point, but may change in the future.
   if(ncon_rep <= NCON_REP_CUTOFF)
-    result = cudppPlan(theCudpp, &scan_plan, scan_config, ncon_rep, 1, 0);
+    result = cudppPlan(&scan_plan, scan_config, ncon_rep, 1, 0);
   else
-    result = cudppPlan(theCudpp, &scan_plan, scan_config, NCON_REP_CUTOFF, 1, 0);
+    result = cudppPlan(&scan_plan, scan_config, NCON_REP_CUTOFF, 1, 0);
   if (CUDPP_SUCCESS != result)
   {
       std::cout << "Error creating scan_plan_rep\n" << std::endl;
       exit(-1);
   }
+  err = cudaGetLastError();
+  cutilSafeCall(err);
   
-  cudppDestroy(theCudpp);
-
   my_stop = clock();
   std::cout << "Successfully allocated CUDPP variables. Total time: "<< 
     float(my_stop - my_start)/CLOCKS_PER_SEC << std::endl;
@@ -430,8 +432,9 @@ void setup_rng(unsigned long long seed, unsigned long long offset)
   std::cout << "Allocating CURAND..." << std::endl;
   my_start = clock();
   
-  cudaMalloc((void **)&devStates, nbead * sizeof(curandState));
+  cutilSafeCall(cudaMalloc((void **)&devStates, nbead * sizeof(curandState)));
   cudaThreadSynchronize();
+  cutilCheckMsg("CURAND allocation failed");
   
   std::cout << "Size of CURAND array: " << nbead * sizeof(curandState) << std::endl;
   
@@ -441,6 +444,8 @@ void setup_rng(unsigned long long seed, unsigned long long offset)
   cudaThreadSynchronize();
   setup_rng_kernel<<<rand_grid, threads>>>(devStates, seed, offset, nbead);
   cudaThreadSynchronize();
+  cutilCheckMsg("CURAND init failed");
+  err = cudaGetLastError();
   
   my_stop = clock();
   std::cout << "Successfully allocated CURAND. Total time: "<< 

@@ -201,8 +201,8 @@ void fene_energy()
   e_bnd = 0.0;
   for (int i = 0; i < nbnd; i++)
   {
-    ibead = ibead_bnd[i].x - 1;
-    jbead = jbead_bnd[i].x - 1;
+    ibead = ibead_bnd[i] - 1;
+    jbead = jbead_bnd[i] - 1;
 
     dx = unc_pos[jbead].x - unc_pos[ibead].x;
     dy = unc_pos[jbead].y - unc_pos[ibead].y;
@@ -238,8 +238,8 @@ __global__ void fene_forces_kernel(FLOAT3 *dev_unc_pos, PDB_FLOAT *dev_pdb_dist,
 
   if (i < nbnd)
   {
-    ibead = dev_ibead_bnd[i].x - 1;
-    jbead = dev_jbead_bnd[i].x - 1;
+    ibead = dev_ibead_bnd[i] - 1;
+    jbead = dev_jbead_bnd[i] - 1;
 
     dx = dev_unc_pos[jbead].x - dev_unc_pos[ibead].x;
     dy = dev_unc_pos[jbead].y - dev_unc_pos[ibead].y;
@@ -286,8 +286,8 @@ void soft_sphere_angular_energy()
 
   for (int i = 0; i < nang; i++)
   {
-    ibead = ibead_ang[i].x - 1;
-    kbead = kbead_ang[i].x - 1;
+    ibead = ibead_ang[i] - 1;
+    kbead = kbead_ang[i] - 1;
 
     r_ik.x = unc_pos[kbead].x - unc_pos[ibead].x;
     r_ik.y = unc_pos[kbead].y - unc_pos[ibead].y;
@@ -308,7 +308,7 @@ void soft_sphere_angular_energy()
 
 //Calculate the soft sphere angular forces on the GPU
 __global__ void soft_sphere_angular_forces_kernel(FLOAT3 *dev_unc_pos, 
-  float3 *dev_force, ushort1* dev_ibead_ang, ushort1* dev_kbead_ang, 
+  float3 *dev_force, ushort* dev_ibead_ang, ushort* dev_kbead_ang, 
   FLOAT f_ang_ss_coeff, int nang, FLOAT boxl)
 {
   int ibead, kbead;
@@ -320,8 +320,8 @@ __global__ void soft_sphere_angular_forces_kernel(FLOAT3 *dev_unc_pos,
 
   if (i < nang)
   {
-    ibead = dev_ibead_ang[i].x - 1;
-    kbead = dev_kbead_ang[i].x - 1;
+    ibead = dev_ibead_ang[i] - 1;
+    kbead = dev_kbead_ang[i] - 1;
 
     dx = dev_unc_pos[kbead].x - dev_unc_pos[ibead].x;
     dy = dev_unc_pos[kbead].y - dev_unc_pos[ibead].y;

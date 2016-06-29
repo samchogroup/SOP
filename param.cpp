@@ -16,8 +16,8 @@ void alloc_arrays()
   R0sq = R0*R0;
   e_bnd_coeff = k_bnd * R0sq / 2.0; // SOP model
   nbnd = 1529;
-  ibead_bnd = new ushort1[nbnd];
-  jbead_bnd = new ushort1[nbnd];
+  ibead_bnd = new ushort[nbnd];
+  jbead_bnd = new ushort[nbnd];
   pdb_dist = new PDB_FLOAT[nbnd];
   bnds_allocated = 1;
 
@@ -26,9 +26,9 @@ void alloc_arrays()
   k_ang = 20.0;
   e_ang_coeff = k_ang / 2.0;
   nang = 1528;
-  ibead_ang = new ushort1[nang];
-  jbead_ang = new ushort1[nang];
-  kbead_ang = new ushort1[nang];
+  ibead_ang = new ushort[nang];
+  jbead_ang = new ushort[nang];
+  kbead_ang = new ushort[nang];
   pdb_ang = new FLOAT[nang];
   angs_allocated = 1;
 
@@ -123,8 +123,8 @@ void init_bonds(int numbonds)
   using namespace std;
 
   nbnd = numbonds;
-  ibead_bnd = new ushort1[numbonds];
-  jbead_bnd = new ushort1[numbonds];
+  ibead_bnd = new ushort[numbonds];
+  jbead_bnd = new ushort[numbonds];
   pdb_dist = new PDB_FLOAT[numbonds];
   bnds_allocated = 1;
 }
@@ -146,9 +146,9 @@ void init_angles(int numangs)
   using namespace std;
 
   nang = numangs;
-  ibead_ang = new ushort1[numangs];
-  jbead_ang = new ushort1[numangs];
-  kbead_ang = new ushort1[numangs];
+  ibead_ang = new ushort[numangs];
+  jbead_ang = new ushort[numangs];
+  kbead_ang = new ushort[numangs];
   pdb_ang = new FLOAT[numangs];
   angs_allocated = 1;
 
@@ -384,11 +384,10 @@ void set_params(int icmd)
     a4 = halfh * (1.0 - h * zeta / 2.0);
     a5 = h / zeta;
   }
-  /*
   else if( !strcmp(opt[opt_ptr[icmd]],"device") ) { // GPU device no
     deviceno=atoi((opt[opt_ptr[icmd]+1]));
-    cudaSetDevice(deviceno);
-    } */
+    cutilSafeCall(cudaSetDevice(deviceno));
+  }
   else
   {
   };

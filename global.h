@@ -85,8 +85,8 @@ extern char pathname[];
 
 extern FLOAT k_bnd; // bond spring constant
 extern int nbnd; // number of bonds
-extern ushort1* ibead_bnd;
-extern ushort1* jbead_bnd;
+extern ushort* ibead_bnd;
+extern ushort* jbead_bnd;
 extern PDB_FLOAT* pdb_dist; // pdb bond distances
 extern int bnds_allocated;
 extern FLOAT R0;
@@ -97,9 +97,9 @@ extern FLOAT e_bnd_coeff;
 
 extern FLOAT k_ang;
 extern int nang;
-extern ushort1* ibead_ang;
-extern ushort1* jbead_ang;
-extern ushort1* kbead_ang;
+extern ushort* ibead_ang;
+extern ushort* jbead_ang;
+extern ushort* kbead_ang;
 extern FLOAT* pdb_ang;
 extern int angs_allocated;
 extern FLOAT e_ang_coeff;
