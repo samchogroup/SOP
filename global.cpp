@@ -13,8 +13,8 @@ char pathname[MAXPATHLEN];
 
 FLOAT k_bnd; // bond spring constant
 int nbnd; // number of bonds
-ushort* ibead_bnd;
-ushort* jbead_bnd;
+ushort1* ibead_bnd;
+ushort1* jbead_bnd;
 PDB_FLOAT* pdb_dist; // pdb bond distances
 int bnds_allocated = 0;
 FLOAT R0;
@@ -25,9 +25,9 @@ FLOAT e_bnd_coeff;
 
 FLOAT k_ang;
 int nang;
-ushort* ibead_ang;
-ushort* jbead_ang;
-ushort* kbead_ang;
+ushort1* ibead_ang;
+ushort1* jbead_ang;
+ushort1* kbead_ang;
 FLOAT* pdb_ang;
 int angs_allocated = 0;
 FLOAT e_ang_coeff;

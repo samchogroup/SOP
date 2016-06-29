@@ -1001,7 +1001,7 @@ void update_neighbor_list()
     dev_idx_neighbor_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 1\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1021,7 +1021,7 @@ void update_neighbor_list()
   result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 2\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1086,7 +1086,7 @@ void update_neighbor_list()
       dev_idx_neighbor_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -1163,7 +1163,7 @@ void update_neighbor_list()
       dev_idx_neighbor_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -1199,7 +1199,7 @@ void update_neighbor_list()
       idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -1513,7 +1513,7 @@ void update_pair_list()
     dev_idx_pair_list_att, nnl_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 1\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1532,7 +1532,7 @@ void update_pair_list()
   result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, nnl_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 2\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1583,7 +1583,7 @@ void update_pair_list()
     dev_idx_pair_list_rep, nnl_rep);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_rep) 1\n");
+    printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1910,7 +1910,7 @@ void update_hybrid_list()
     dev_idx_neighbor_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 1\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1930,7 +1930,7 @@ void update_hybrid_list()
   result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_nl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 2\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -1995,7 +1995,7 @@ void update_hybrid_list()
       dev_idx_neighbor_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -2072,7 +2072,7 @@ void update_hybrid_list()
       dev_idx_neighbor_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -2108,7 +2108,7 @@ void update_hybrid_list()
       idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -2342,7 +2342,7 @@ void update_cell_list()
     dev_idx_pair_list_att, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 1\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 1\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -2362,7 +2362,7 @@ void update_cell_list()
   result = cudppRadixSort(sort_plan, dev_is_nl_2, dev_pl_lj_nat_pdb_dist, ncon_att);
   if (CUDPP_SUCCESS != result)
   {
-    printf("Error calling cppSort(sort_plan_att) 2\n");
+    printf("Error calling cudppRadixSort(sort_plan_att) 2\n");
     exit(-1);
   }
   err = cudaGetLastError();
@@ -2428,7 +2428,7 @@ void update_cell_list()
       dev_idx_pair_list_rep, ncon_rep);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -2506,7 +2506,7 @@ void update_cell_list()
       dev_idx_pair_list_rep, NCON_REP_CUTOFF);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();
@@ -2542,7 +2542,7 @@ void update_cell_list()
       idx_rep_tmp, numTmp);
     if (CUDPP_SUCCESS != result)
     {
-      printf("Error calling cppSort(sort_plan_rep) 1\n");
+      printf("Error calling cudppRadixSort(sort_plan_rep) 1\n");
       exit(-1);
     }
     err = cudaGetLastError();

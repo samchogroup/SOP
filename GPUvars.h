@@ -14,7 +14,7 @@
 #include <curand.h>
 #include <curand_kernel.h>
 #include "global.h"
-#include "cudpp.h"
+#include <cudpp.h>
 
 //Execute the force calculation kernels in concurrent streams.  This improves
 //performance slightly.  

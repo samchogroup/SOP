@@ -137,9 +137,9 @@ void load(int icmd)
     {
       in.getline(line, 2048);
       tokPtr = strtok(line, " ");
-      ibead_bnd[i] = atoi(tokPtr); // first bead index
+      ibead_bnd[i].x = atoi(tokPtr); // first bead index
       tokPtr = strtok(NULL, " ");
-      jbead_bnd[i] = atoi(tokPtr); // second bead index
+      jbead_bnd[i].x = atoi(tokPtr); // second bead index
       tokPtr = strtok(NULL, " ");
       pdb_dist[i] = atof(tokPtr); // equilibrium distance (angstrom)
     }
@@ -160,11 +160,11 @@ void load(int icmd)
     {
       in.getline(line, 2048);
       tokPtr = strtok(line, " ");
-      ibead_ang[i] = atoi(tokPtr); // first bead index
+      ibead_ang[i].x = atoi(tokPtr); // first bead index
       tokPtr = strtok(NULL, " ");
-      jbead_ang[i] = atoi(tokPtr); // second bead index
+      jbead_ang[i].x = atoi(tokPtr); // second bead index
       tokPtr = strtok(NULL, " ");
-      kbead_ang[i] = atoi(tokPtr); // third bead index
+      kbead_ang[i].x = atoi(tokPtr); // third bead index
       tokPtr = strtok(NULL, " ");
       pdb_ang[i] = atof(tokPtr); // equilibrium angle (radians) ; SOP -> dist between bead i,i+2
     }
@@ -358,9 +358,9 @@ void load_coords(char* fname, char* fname2)
   ifile2.close();
   
   //Copy the newly loaded pos and unc_pos arrays to the GPU
-  cutilSafeCall(cudaMemcpy(dev_pos, pos, pos_size, cudaMemcpyHostToDevice));
-  cutilSafeCall(cudaMemcpy(dev_unc_pos, unc_pos, unc_pos_size, 
-    cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_pos, pos, pos_size, cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_unc_pos, unc_pos, unc_pos_size, 
+    cudaMemcpyHostToDevice);
 }
 
 void save_vels(char* fname)
@@ -404,5 +404,5 @@ void load_vels(char* fname)
   ifile.close();
   
   //Copy the newly loaded velocities to the GPU
-  cutilSafeCall(cudaMemcpy(dev_vel, vel, vel_size, cudaMemcpyHostToDevice));
+  cudaMemcpy(dev_vel, vel, vel_size, cudaMemcpyHostToDevice);
 }
