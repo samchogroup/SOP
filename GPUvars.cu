@@ -237,7 +237,7 @@ void alloc_cudpp()
   //The configuration for the radix sort
   sort_config.datatype = CUDPP_UINT;
   sort_config.algorithm = CUDPP_SORT_RADIX;
-  sort_config.options = 0;
+  sort_config.options = CUDPP_OPTION_KEYS_ONLY | CUDPP_OPTION_BACKWARD;
 
   //The configuration for the parallel scan
   scan_config.op = CUDPP_ADD;
