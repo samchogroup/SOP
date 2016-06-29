@@ -27,7 +27,7 @@ __global__ void fene_forces_kernel(FLOAT3 *dev_unc_pos, PDB_FLOAT *dev_pdb_dist,
   float3 *dev_force, ushort1 *dev_ibead_bnd, ushort1 *dev_jbead_bnd,
   int nbnd, FLOAT boxl, FLOAT k_bnd, FLOAT R0sq);
 __global__ void soft_sphere_angular_forces_kernel(FLOAT3 *dev_unc_pos, float3 *dev_force,
-  ushort* dev_ibead_ang, ushort* dev_kbead_ang, FLOAT f_ang_ss_coeff, int nbnd, 
+  ushort1* dev_ibead_ang, ushort1* dev_kbead_ang, FLOAT f_ang_ss_coeff, int nbnd, 
   FLOAT boxl);
 __global__ void vdw_forces_att_kernel(FLOAT boxl, 
   int nil_att, float3 *dev_force, FLOAT3 *dev_unc_pos, ushort2 *dev_idx_pair_list_att,
